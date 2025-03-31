@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Build and Publish"
-        uses: MyBorislavrOrg/qubership-core-build/.github/actions/maven-multimodule-release@main
+        uses: ./.github/actions/maven-multimodule-release@main
         with:
           version-type: ${{ github.event.inputs.version-type }}
           module: ${{ matrix.module }}
