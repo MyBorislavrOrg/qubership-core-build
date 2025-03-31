@@ -1,0 +1,4 @@
+child_modules:
+  - name: qubership-core-utils
+  - name: qubership-core-error-handling
+  - name: qubership-core-process-orchestrator

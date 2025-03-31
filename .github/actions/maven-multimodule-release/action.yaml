@@ -1,0 +1,71 @@
+---
+name: Build Maven Artifact
+description: Build Maven artifact
+
+inputs:
+  version-type:
+    description: 'Version type to release. Can be one of [major, minor, patch]'
+    required: true
+    default: 'patch'
+    type: string
+  module:
+    description: 'Module to build == Repository name.'
+    required: true
+    default: ''
+    type: string
+  token:
+    description: 'GitHub token'
+    required: true
+    default: ''
+    type: string
+runs:
+  using: "composite"
+  steps:
+    - name: "Prepare scripts"
+      run: . ${GITHUB_ACTION_PATH}/action-scripts.sh
+      shell: bash
+    - name: "Check inputs"
+      run: |
+        . ${GITHUB_ACTION_PATH}/action-scripts.sh
+        check_version_type "${{ inputs.version-type }}"
+        check_module "${{ inputs.module }}"
+        check_token "${{ inputs.token }}"
+        # set_env_vars "${{ inputs.module }}" "${{ inputs.version-type }}"
+      shell: bash
+
+    - name: "Configure java"
+      uses: actions/setup-java@v4
+      with:
+        distribution: "temurin"
+        java-version: '21'
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        path: ${{ inputs.module }}
+        repository: ${{ github.repository_owner }}/${{ inputs.module }}
+        token: ${{ inputs.token }}
+    - name: "Build"
+      run: |
+        . ${GITHUB_ACTION_PATH}/action-scripts.sh
+        bump_version_and_build "${{ inputs.module }}" "${{ inputs.version-type }}"
+      shell: bash
+      env:
+        MODULE: ${{ inputs.module }}
+        VERSION_TYPE: ${{ inputs.version-type }}
+    - name: "Deploy"
+      run: |
+        . ${GITHUB_ACTION_PATH}/action-scripts.sh
+        maven_deploy "${{ inputs.module }}"
+      shell: bash
+      env:
+        MODULE: ${{ inputs.module }}
+        VERSION_TYPE: ${{ inputs.version-type }}
+    - name: "Bump version to next snapshot"
+      run: |
+        . ${GITHUB_ACTION_PATH}/action-scripts.sh
+        bump_to_next_snapshot
+      shell: bash
+      env:
+        MODULE: ${{ inputs.module }}
+        VERSION_TYPE: ${{ inputs.version-type }}

@@ -1,0 +1,71 @@
+---
+
+# The configuration file for the multi-module maven release workflow
+# .github/.child-modules.yaml
+# child_modules:
+#   - name: module1
+#   - name: module2
+#   - name: module3
+
+name: Multi-module maven release action
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-type:
+        description: 'Version type to release'
+        type: choice
+        options:
+          - 'major'
+          - 'minor'
+          - 'patch'
+        required: true
+        default: 'patch'
+
+permissions:
+  contents: write
+
+jobs:
+  get-child-modules:
+    outputs:
+      modules: ${{ steps.get-child-modules.outputs.modules }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: "Get child modules"
+        id: get-child-modules
+        run: |
+          if [ -f ./.github/.child-modules.yaml ]; then
+            echo "modules=$(yq eval -j '.child_modules | map(.name)' ./.github/.child-modules.yaml | jq -c)" >> $GITHUB_OUTPUT
+          else
+            echo "❗ There is no configuration file .github/.child-modules.yaml"
+            exit 1
+          fi
+        shell: bash
+  build:
+    needs: get-child-modules
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        module: ${{ fromJson(needs.get-child-modules.outputs.modules) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Build and Publish"
+        uses: MyBorislavrOrg/qubership-core-build/.github/actions/maven-multimodule-release@main
+        with:
+          version-type: ${{ github.event.inputs.version-type }}
+          module: ${{ matrix.module }}
+          token: ${{ secrets.MVN_MULTI_MODULE_TOKEN }}
+      - name: "Trigger module release"
+        uses: netcracker/qubership-workflow-hub/actions/custom-event@main
+        with:
+          github-token: ${{ secrets.REMOTE_TRIGGER_TOKEN }}
+          repo: ${{ matrix.module }}
+          owner: ${{ github.repository_owner }}
+          event-type: remote_release_trigger
+          client-payload: |
+            {
+              "version": "${{ env.VERSION }}"
+            }
