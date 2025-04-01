@@ -1,4 +1,7 @@
 child_modules:
   - name: qubership-core-utils
+    maven-args: "-Dgpg.skip=true"
   - name: qubership-core-error-handling
+    maven-args: "-Dgpg.skip=true"
   - name: qubership-core-process-orchestrator
+    maven-args: "-Dgpg.skip=true"

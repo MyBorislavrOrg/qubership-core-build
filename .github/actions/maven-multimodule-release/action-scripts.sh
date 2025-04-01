@@ -24,6 +24,7 @@ function check_token() {
 function set_env_vars() {
     export MODULE=$1
     export VERSION_TYPE=$2
+    export MVN_ARGS=$3
 }
 
 function bump_version_and_build() {
@@ -44,11 +45,21 @@ function bump_version_and_build() {
     export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     echo "VERSION=${VERSION}" >> $GITHUB_ENV
     echo "Building ${MODULE} version ${VERSION}"
-    mvn --batch-mode install
+    mvn --batch-mode install $MVN_ARGS
+    if [ $? -ne 0 ]; then
+        echo "Build failed. Exiting."
+        exit 1
+    fi
+    echo "Build succeeded. Commiting pom.xml with release version."
+    if [ "${DRY_RUN}" != "false" ]; then
+        echo "Dry run. Not committing."
+        return
+    fi
     mvn clean
     git add .
     git commit -m "Bump version to ${VERSION} [skip ci]"
     git push
+    echo "Creating tag v${VERSION}"
     git tag -a v${VERSION} -m "Release version v${VERSION} [skip ci]"
     git push origin v${VERSION}
 }
@@ -57,15 +68,31 @@ function maven_deploy() {
     cd ${GITHUB_WORKSPACE}/${MODULE}
     export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     echo "Deploying ${MODULE} version ${VERSION}"
-    # mvn --batch-mode deploy -DskipTests
-    mvn --batch-mode install -DskipTests
+    if [ "${DRY_RUN}" != "false" ]; then
+        echo "Dry run. Not deploying."
+        return
+    fi
+    mvn --batch-mode deploy -DskipTests $MVN_ARGS
+    if [ $? -ne 0 ]; then
+        echo "Deploy failed. Exiting."
+        exit 1
+    fi
+    echo "Deploy succeeded."
 }
 
 function bump_to_next_snapshot() {
+    echo "Bumping ${MODULE} version to next snapshot"
+    echo "Current version is ${VERSION}"
+    if [ "${DRY_RUN}" != "false" ]; then
+        echo "Dry run. Not bumping to next snapshot."
+        return
+    fi
     cd ${GITHUB_WORKSPACE}/${MODULE}
     mvn build-helper:parse-version versions:set -DgenerateBackupPoms=false \
     -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT
     export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+    echo "Next snapshot version is ${VERSION}"
+    echo "Commiting pom.xml with next snapshot version."
     mvn clean
     git add .
     git commit -m "Bump version to next snapshot ${VERSION} [skip ci]"

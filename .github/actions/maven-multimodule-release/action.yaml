@@ -13,6 +13,26 @@ inputs:
     required: true
     default: ''
     type: string
+  maven-args:
+    description: 'Maven arguments to pass'
+    required: false
+    default: '-DskipTests=true -Dmaven.javadoc.skip=true -B -V'
+    type: string
+  server-id:
+    description: 'Maven server ID'
+    required: false
+    default: 'github'
+    type: string
+  java-version:
+    description: 'Java version to use'
+    required: false
+    default: '21'
+    type: string
+  dry-run:
+    description: 'Dry run flag'
+    required: false
+    default: 'true'
+    type: string
   token:
     description: 'GitHub token'
     required: true
@@ -21,9 +41,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "Prepare scripts"
-      run: . ${GITHUB_ACTION_PATH}/action-scripts.sh
-      shell: bash
     - name: "Check inputs"
       run: |
         . ${GITHUB_ACTION_PATH}/action-scripts.sh
@@ -33,11 +50,16 @@ runs:
         # set_env_vars "${{ inputs.module }}" "${{ inputs.version-type }}"
       shell: bash
 
-    - name: "Configure java"
+    - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        distribution: "temurin"
-        java-version: '21'
+        java-version: ${{ inputs.java-version }}
+        distribution: 'temurin'
+        server-id: ${{ inputs.server-id }}
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+        # gpg-private-key: ${{ secrets.gpg-private-key }}
+        # gpg-passphrase: MAVEN_GPG_PASSPHRASE
     - name: Checkout
       uses: actions/checkout@v4
       with:
@@ -45,27 +67,22 @@ runs:
         path: ${{ inputs.module }}
         repository: ${{ github.repository_owner }}/${{ inputs.module }}
         token: ${{ inputs.token }}
-    - name: "Build"
+    - name: "Release"
       run: |
         . ${GITHUB_ACTION_PATH}/action-scripts.sh
-        bump_version_and_build "${{ inputs.module }}" "${{ inputs.version-type }}"
-      shell: bash
-      env:
-        MODULE: ${{ inputs.module }}
-        VERSION_TYPE: ${{ inputs.version-type }}
-    - name: "Deploy"
-      run: |
-        . ${GITHUB_ACTION_PATH}/action-scripts.sh
-        maven_deploy "${{ inputs.module }}"
-      shell: bash
-      env:
-        MODULE: ${{ inputs.module }}
-        VERSION_TYPE: ${{ inputs.version-type }}
-    - name: "Bump version to next snapshot"
-      run: |
-        . ${GITHUB_ACTION_PATH}/action-scripts.sh
+        echo "Building ${{ inputs.module }}"
+        bump_version_and_build
+        echo "Deploying ${{ inputs.module }}"
+        maven_deploy
+        echo "Bump version to next snapshot"
         bump_to_next_snapshot
       shell: bash
       env:
+        MAVEN_USERNAME: ${{ github.actor }}
+        MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         MODULE: ${{ inputs.module }}
         VERSION_TYPE: ${{ inputs.version-type }}
+        MVN_ARGS: ${{ inputs.maven-args }}
+        DRY_RUN: ${{ inputs.dry-run }}
+        # MAVEN_GPG_PASSPHRASE: ${{ secrets.gpg-passphrase }}
+        # SONAR_TOKEN: ${{ secrets.sonar-token }}

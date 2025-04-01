@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   get-child-modules:
@@ -43,7 +44,7 @@ jobs:
             exit 1
           fi
         shell: bash
-  build:
+  dry-run-build:
     needs: get-child-modules
     strategy:
       max-parallel: 1
@@ -54,12 +55,54 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: "Get mvn args for the module"
+        id: get-mvn-command
+        run: |
+          if [ -f ./.github/.child-modules.yaml ]; then
+            echo "mvn_args=$(yq eval -j '.child_modules[] | select(.name == \"${{ matrix.module }}\") | .maven-args' ./.github/.child-modules.yaml)" >> $GITHUB_OUTPUT
+          else
+            echo "❗ There is no configuration file .github/.child-modules.yaml"
+            exit 1
+          fi
+        shell: bash
       - name: "Build and Publish"
         uses: ./.github/actions/maven-multimodule-release@main
         with:
           version-type: ${{ github.event.inputs.version-type }}
           module: ${{ matrix.module }}
+          maven-args: ${{ steps.get-mvn-command.outputs.mvn_args }}
           token: ${{ secrets.MVN_MULTI_MODULE_TOKEN }}
+          dry-run: 'true'
+  deploy:
+    needs: dry-run-build
+    strategy:
+      fail-fast: true
+      max-parallel: 1
+      matrix:
+        module: ${{ fromJson(needs.get-child-modules.outputs.modules) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: "Get mvn args for the module"
+        id: get-mvn-command
+        run: |
+          if [ -f ./.github/.child-modules.yaml ]; then
+            echo "mvn_args=$(yq eval -j '.child_modules[] | select(.name == \"${{ matrix.module }}\") | .maven-args' ./.github/.child-modules.yaml)" >> $GITHUB_OUTPUT
+          else
+            echo "❗ There is no configuration file .github/.child-modules.yaml"
+            exit 1
+          fi
+        shell: bash
+      - name: "Build and Publish"
+        uses: ./.github/actions/maven-multimodule-release@main
+        with:
+          version-type: ${{ github.event.inputs.version-type }}
+          module: ${{ matrix.module }}
+          maven-args: ${{ steps.get-mvn-command.outputs.mvn_args }}
+          token: ${{ secrets.MVN_MULTI_MODULE_TOKEN }}
+          dry-run: 'false'
+          server-id: github
       - name: "Trigger module release"
         uses: netcracker/qubership-workflow-hub/actions/custom-event@main
         with:
