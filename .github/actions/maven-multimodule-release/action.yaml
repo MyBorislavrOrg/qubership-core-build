@@ -79,10 +79,11 @@ runs:
       shell: bash
       env:
         MAVEN_USERNAME: ${{ github.actor }}
-        MAVEN_PASSWORD: ${{ github.token }}
+        MAVEN_PASSWORD: ${{ inputs.token }}
         MODULE: ${{ inputs.module }}
         VERSION_TYPE: ${{ inputs.version-type }}
         MVN_ARGS: ${{ inputs.maven-args }}
         DRY_RUN: ${{ inputs.dry-run }}
+        GITHUB_TOKEN: ${{ inputs.token }}
         # MAVEN_GPG_PASSPHRASE: ${{ secrets.gpg-passphrase }}
         # SONAR_TOKEN: ${{ secrets.sonar-token }}
