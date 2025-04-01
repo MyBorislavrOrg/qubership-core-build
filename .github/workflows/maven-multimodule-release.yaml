@@ -52,6 +52,8 @@ jobs:
         module: ${{ fromJson(needs.get-child-modules.outputs.modules) }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: "Build and Publish"
         uses: ./.github/actions/maven-multimodule-release@main
         with:
