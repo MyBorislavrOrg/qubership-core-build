@@ -73,7 +73,7 @@ runs:
         echo "Building ${{ inputs.module }}"
         bump_version_and_build
         echo "Deploying ${{ inputs.module }}"
-        maven_deploy
+        # maven_deploy
         echo "Bump version to next snapshot"
         bump_to_next_snapshot
       shell: bash

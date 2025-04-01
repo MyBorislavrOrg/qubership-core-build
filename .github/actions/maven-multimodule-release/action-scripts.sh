@@ -49,7 +49,7 @@ function bump_version_and_build() {
     export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     echo "VERSION=${VERSION}" >> $GITHUB_ENV
     echo "Building ${MODULE} version ${VERSION}"
-    mvn --batch-mode install $MVN_ARGS
+    mvn --batch-mode deploy $MVN_ARGS
     if [ $? -ne 0 ]; then
         echo "Build failed. Exiting."
         exit 1
@@ -68,21 +68,21 @@ function bump_version_and_build() {
     git push origin v${VERSION}
 }
 
-function maven_deploy() {
-    cd ${GITHUB_WORKSPACE}/${MODULE}
-    export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-    echo "Deploying ${MODULE} version ${VERSION}"
-    if [ "${DRY_RUN}" != "false" ]; then
-        echo "Dry run. Not deploying."
-        return
-    fi
-    mvn --batch-mode deploy -DskipTests $MVN_ARGS
-    if [ $? -ne 0 ]; then
-        echo "Deploy failed. Exiting."
-        exit 1
-    fi
-    echo "Deploy succeeded."
-}
+# function maven_deploy() {
+#     cd ${GITHUB_WORKSPACE}/${MODULE}
+#     export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+#     echo "Deploying ${MODULE} version ${VERSION}"
+#     if [ "${DRY_RUN}" != "false" ]; then
+#         echo "Dry run. Not deploying."
+#         return
+#     fi
+#     mvn --batch-mode deploy -DskipTests $MVN_ARGS
+#     if [ $? -ne 0 ]; then
+#         echo "Deploy failed. Exiting."
+#         exit 1
+#     fi
+#     echo "Deploy succeeded."
+# }
 
 function bump_to_next_snapshot() {
     echo "Bumping ${MODULE} version to next snapshot"

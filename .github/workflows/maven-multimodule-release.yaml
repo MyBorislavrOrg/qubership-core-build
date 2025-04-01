@@ -71,7 +71,7 @@ jobs:
           version-type: ${{ github.event.inputs.version-type }}
           module: ${{ matrix.module }}
           maven-args: ${{ steps.get-mvn-command.outputs.mvn_args }}
-          token: ${{ secrets.MVN_MULTI_MODULE_TOKEN }}
+          token: ${{ secrets.MVN_DEPLOY_CLASSIC_TOKEN }}
           dry-run: 'true'
   deploy:
     needs: [dry-run-build, get-child-modules]
@@ -101,7 +101,7 @@ jobs:
           version-type: ${{ github.event.inputs.version-type }}
           module: ${{ matrix.module }}
           maven-args: ${{ steps.get-mvn-command.outputs.mvn_args }}
-          token: ${{ secrets.MVN_MULTI_MODULE_TOKEN }}
+          token: ${{ secrets.MVN_DEPLOY_CLASSIC_TOKEN }}
           dry-run: 'false'
           server-id: github
       - name: "Trigger module release"
