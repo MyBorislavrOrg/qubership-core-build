@@ -16,7 +16,7 @@ inputs:
   maven-args:
     description: 'Maven arguments to pass'
     required: false
-    default: '-DskipTests=true -Dmaven.javadoc.skip=true -B -V'
+    default: '-DskipTests=true -Dmaven.javadoc.skip=true -B'
     type: string
   server-id:
     description: 'Maven server ID'
@@ -72,8 +72,6 @@ runs:
         . ${GITHUB_ACTION_PATH}/action-scripts.sh
         echo "Building ${{ inputs.module }}"
         bump_version_and_build
-        echo "Deploying ${{ inputs.module }}"
-        # maven_deploy
         echo "Bump version to next snapshot"
         bump_to_next_snapshot
       shell: bash
