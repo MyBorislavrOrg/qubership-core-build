@@ -59,7 +59,7 @@ function bump_version_and_build() {
         echo "Dry run. Not committing."
         return
     fi
-    mvn clean
+    mvn --batch-mode clean
     git add .
     git commit -m "Bump version to ${VERSION} [skip ci]"
     git push
@@ -97,7 +97,7 @@ function bump_to_next_snapshot() {
     export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     echo "Next snapshot version is ${VERSION}"
     echo "Commiting pom.xml with next snapshot version."
-    mvn clean
+    mvn --batch-mode clean
     git add .
     git commit -m "Bump version to next snapshot ${VERSION} [skip ci]"
     git push
