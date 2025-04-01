@@ -32,15 +32,19 @@ function bump_version_and_build() {
     git config --global user.name "${GITHUB_ACTOR}"
     git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
     echo "Bumping ${MODULE} version"
-    if [ "${VERSION_TYPE}" == "major" ]; then
-        mvn --batch-mode build-helper:parse-version versions:set -DgenerateBackupPoms=false \
-        -DnewVersion=\${parsedVersion.nextMajorVersion}.0.0
-    elif [ "${VERSION_TYPE}" == "minor" ]; then
-        mvn --batch-mode build-helper:parse-version versions:set -DgenerateBackupPoms=false \
-        -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}.0
+    if [ "${DRY_RUN}" != "false" ]; then
+        echo "Dry run. Not bumping version."
     else
-        mvn --batch-mode build-helper:parse-version versions:set -DgenerateBackupPoms=false \
-        -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.incrementalVersion}
+        if [ "${VERSION_TYPE}" == "major" ]; then
+            mvn --batch-mode build-helper:parse-version versions:set -DgenerateBackupPoms=false \
+            -DnewVersion=\${parsedVersion.nextMajorVersion}.0.0
+        elif [ "${VERSION_TYPE}" == "minor" ]; then
+            mvn --batch-mode build-helper:parse-version versions:set -DgenerateBackupPoms=false \
+            -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.nextMinorVersion}.0
+        else
+            mvn --batch-mode build-helper:parse-version versions:set -DgenerateBackupPoms=false \
+            -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.incrementalVersion}
+        fi
     fi
     export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     echo "VERSION=${VERSION}" >> $GITHUB_ENV

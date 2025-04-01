@@ -74,7 +74,8 @@ jobs:
           token: ${{ secrets.MVN_MULTI_MODULE_TOKEN }}
           dry-run: 'true'
   deploy:
-    needs: dry-run-build
+    needs: [dry-run-build, get-child-modules]
+    if: ${{ needs.dry-run-build.result == 'success' }}
     strategy:
       fail-fast: true
       max-parallel: 1
