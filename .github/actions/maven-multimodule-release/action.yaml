@@ -79,7 +79,7 @@ runs:
       shell: bash
       env:
         MAVEN_USERNAME: ${{ github.actor }}
-        MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        MAVEN_PASSWORD: ${{ github.token }}
         MODULE: ${{ inputs.module }}
         VERSION_TYPE: ${{ inputs.version-type }}
         MVN_ARGS: ${{ inputs.maven-args }}
