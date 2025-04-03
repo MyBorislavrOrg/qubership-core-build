@@ -75,8 +75,8 @@ jobs:
   #         dry-run: 'true'
   deploy:
     # needs: [dry-run-build, get-child-modules]
+    # if: ${{ needs.dry-run-build.result == 'success' }}
     needs: get-child-modules
-    if: ${{ needs.dry-run-build.result == 'success' }}
     strategy:
       fail-fast: true
       max-parallel: 1
