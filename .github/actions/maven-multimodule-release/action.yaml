@@ -114,5 +114,6 @@ runs:
         MVN_ARGS: ${{ inputs.maven-args }}
         DRY_RUN: ${{ inputs.dry-run }}
         GITHUB_TOKEN: ${{ inputs.token }}
+        RELEASE_VERSION: ${{ steps.release.outputs.RELEASE_VERSION }}
         # MAVEN_GPG_PASSPHRASE: ${{ secrets.gpg-passphrase }}
         # SONAR_TOKEN: ${{ secrets.sonar-token }}
