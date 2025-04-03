@@ -87,3 +87,28 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token }}
         # MAVEN_GPG_PASSPHRASE: ${{ secrets.gpg-passphrase }}
         # SONAR_TOKEN: ${{ secrets.sonar-token }}
+    - name: Checkout
+      if: ${{ inputs.dry-run == 'false' }}
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        path: ${{ inputs.module }}
+        repository: ${{ github.repository_owner }}/${{ inputs.module }}
+        token: ${{ inputs.token }}
+    - name: "Release"
+      if: ${{ inputs.dry-run == 'false' }}
+      id: release
+      run: |
+        . ${GITHUB_ACTION_PATH}/action-scripts1.sh
+        bump_dependencies_versions
+      shell: bash
+      env:
+        MAVEN_USERNAME: ${{ github.actor }}
+        MAVEN_PASSWORD: ${{ inputs.token }}
+        MODULE: ${{ inputs.module }}
+        VERSION_TYPE: ${{ inputs.version-type }}
+        MVN_ARGS: ${{ inputs.maven-args }}
+        DRY_RUN: ${{ inputs.dry-run }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+        # MAVEN_GPG_PASSPHRASE: ${{ secrets.gpg-passphrase }}
+        # SONAR_TOKEN: ${{ secrets.sonar-token }}

@@ -66,6 +66,9 @@ function bump_version_and_build() {
         exit 1
     fi
     echo "✅ Release: ${MODULE} version ${RELEASE_VERSION} released successfully." >> $GITHUB_STEP_SUMMARY
+}
+
+function bump_dependencies_versions() {
     # To update pom.xml dependencies with the next -SNAPSHOT version need to deploy SNAPSHOT version
     if [ "${DRY_RUN}" != "false" ]; then
         echo "Dry run. Not updating dependencies."
@@ -92,14 +95,22 @@ function bump_version_and_build() {
     echo "::group::Clean and commit pom.xml with next-snapshot version."
     echo "Committing pom.xml with release version."
     mvn --batch-mode clean
-    git add .
-    git commit -m "Bump dependencies versions to next-snapshot [skip ci]"
-    git push
-    echo "::endgroup::"
-    if [ $? -ne 0 ]; then
-        echo "Commit failed. Exiting."
-        echo "❌ Commit: ${MODULE} pom.xml with next-snapshot version failed." >> $GITHUB_STEP_SUMMARY
-        exit 1
+    gitdiffstat=$(git diff --stat)
+    if [ -z "${gitdiffstat}" ]
+    then
+        echo "No changes"
+        echo "✅ Commit: There were no changed dependencies versions in ${MODULE} pom.xml." >> $GITHUB_STEP_SUMMARY
+        return
+    else
+        git add .
+        git commit -m "Bump dependencies versions to next-snapshot [skip ci]"
+        git push
+        echo "::endgroup::"
+        if [ $? -ne 0 ]; then
+            echo "Commit failed. Exiting."
+            echo "❌ Commit: ${MODULE} pom.xml with next-snapshot version failed." >> $GITHUB_STEP_SUMMARY
+            exit 1
+        fi
+        echo "✅ Commit: ${MODULE} pom.xml with next-snapshot version committed successfully." >> $GITHUB_STEP_SUMMARY
     fi
-    echo "✅ Commit: ${MODULE} pom.xml with next-snapshot version committed successfully." >> $GITHUB_STEP_SUMMARY
 }
