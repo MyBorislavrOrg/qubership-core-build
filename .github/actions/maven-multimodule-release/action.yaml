@@ -43,7 +43,7 @@ runs:
   steps:
     - name: "Check inputs"
       run: |
-        . ${GITHUB_ACTION_PATH}/action-scripts.sh
+        . ${GITHUB_ACTION_PATH}/action-scripts1.sh
         check_version_type "${{ inputs.version-type }}"
         check_module "${{ inputs.module }}"
         check_token "${{ inputs.token }}"
@@ -69,7 +69,7 @@ runs:
         token: ${{ inputs.token }}
     - name: "Release"
       run: |
-        . ${GITHUB_ACTION_PATH}/action-scripts.sh
+        . ${GITHUB_ACTION_PATH}/action-scripts1.sh
         echo "Building ${{ inputs.module }}"
         bump_version_and_build
         echo "Bump version to next snapshot"
