@@ -87,6 +87,11 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token }}
         # MAVEN_GPG_PASSPHRASE: ${{ secrets.gpg-passphrase }}
         # SONAR_TOKEN: ${{ secrets.sonar-token }}
+    - name: Cleanup
+      if: ${{ inputs.dry-run == 'false' }}
+      run: |
+        rm -rf ${GITHUB_WORKSPACE}/${{ inputs.module }}
+      shell: bash
     - name: Checkout
       if: ${{ inputs.dry-run == 'false' }}
       uses: actions/checkout@v4
