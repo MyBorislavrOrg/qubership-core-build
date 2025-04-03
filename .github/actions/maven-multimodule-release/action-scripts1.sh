@@ -36,6 +36,8 @@ function bump_version_and_build() {
     else
         mvn --batch-mode versions:use-releases -DgenerateBackupPoms=false
         mvn --batch-mode release:prepare -DautoVersionSubmodules=true -DpushChanges=true -DtagNameFormat="v@{project.version}"
+        cat release.properties
+        exit 0
         if [ $? -ne 0 ]; then
             echo "Release preparation failed. Exiting."
             exit 1
