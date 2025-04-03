@@ -99,7 +99,7 @@ function bump_dependencies_versions() {
     if [ -z "${gitdiffstat}" ]
     then
         echo "No changes"
-        echo "Commit: There were no changed dependencies versions in ${MODULE} pom.xml." >> $GITHUB_STEP_SUMMARY
+        echo "ℹ️ Commit: There were no changed dependencies versions in ${MODULE} pom.xml." >> $GITHUB_STEP_SUMMARY
         return
     else
         git add .
