@@ -75,15 +75,16 @@ function bump_dependencies_versions() {
         echo "Dry run. Not updating dependencies."
         return
     fi
-    echo "::group::Building ${MODULE} version ${RELEASE_VERSION}-SNAPSHOT"
+    export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+    echo "::group::Building ${MODULE} version ${VERSION}-SNAPSHOT"
     mvn --batch-mode deploy -DskipTests=true $MVN_ARGS
     echo "::endgroup::"
     if [ $? -ne 0 ]; then
         echo "Build failed. Exiting."
-        echo "❌ Build: ${MODULE} version ${RELEASE_VERSION}-SNAPSHOT failed." >> $GITHUB_STEP_SUMMARY
+        echo "❌ Build: ${MODULE} version ${VERSION}-SNAPSHOT failed." >> $GITHUB_STEP_SUMMARY
         exit 1
     fi
-    echo "✅ Build: ${MODULE} version ${RELEASE_VERSION}-SNAPSHOT built successfully." >> $GITHUB_STEP_SUMMARY
+    echo "✅ Build: ${MODULE} version ${VERSION}-SNAPSHOT built successfully." >> $GITHUB_STEP_SUMMARY
     echo "::group::Updating ${MODULE} dependencies versions to next-snapshot"
     mvn --batch-mode versions:use-next-snapshots -DgenerateBackupPoms=false -Dincludes="org.qubership.cloud*:*,org.qubership.core*:*"
     echo "::endgroup::"
