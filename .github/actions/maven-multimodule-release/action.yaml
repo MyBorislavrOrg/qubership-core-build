@@ -75,12 +75,7 @@ runs:
       id: release
       run: |
         . ${GITHUB_ACTION_PATH}/action-scripts1.sh
-        echo "::group::Building ${{ inputs.module }}"
         bump_version_and_build
-        echo "::endgroup::"
-        # echo "::group::Bump version to next snapshot"
-        # bump_to_next_snapshot
-        # echo "::endgroup::"
       shell: bash
       env:
         MAVEN_USERNAME: ${{ github.actor }}
