@@ -69,6 +69,7 @@ function bump_version_and_build() {
 }
 
 function bump_dependencies_versions() {
+    cd ${GITHUB_WORKSPACE}/${MODULE}
     # To update pom.xml dependencies with the next -SNAPSHOT version need to deploy SNAPSHOT version
     if [ "${DRY_RUN}" != "false" ]; then
         echo "Dry run. Not updating dependencies."
