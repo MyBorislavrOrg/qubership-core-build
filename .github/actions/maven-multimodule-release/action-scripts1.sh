@@ -40,7 +40,7 @@ function bump_version_and_build() {
     else
         echo "::group::Preparing ${MODULE} release."
         mvn --batch-mode versions:use-releases -DgenerateBackupPoms=false
-        mvn --batch-mode release:prepare -DautoVersionSubmodules=true -DpushChanges=false -DtagNameFormat="v@{project.version}"
+        mvn --batch-mode release:prepare -DautoVersionSubmodules=true -DpushChanges=true -DtagNameFormat="v@{project.version}"
         echo "::endgroup::"
         if [ $? -ne 0 ]; then
             echo "Release preparation failed. Exiting."
