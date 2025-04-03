@@ -85,14 +85,13 @@ function bump_dependencies_versions() {
     fi
     echo "✅ Build: ${MODULE} version ${RELEASE_VERSION}-SNAPSHOT built successfully." >> $GITHUB_STEP_SUMMARY
     echo "::group::Updating ${MODULE} dependencies versions to next-snapshot"
-    mvn --batch-mode versions:use-next-snapshots -DgenerateBackupPoms=false -Dincludes="org.qubership.cloud*:*"
+    mvn --batch-mode versions:use-next-snapshots -DgenerateBackupPoms=false -Dincludes="org.qubership.cloud*:*,org.qubership.core*:*"
     echo "::endgroup::"
     if [ $? -ne 0 ]; then
         echo "Update dependencies failed. Exiting."
         echo "❌ Update: ${MODULE} dependencies versions to next-snapshot failed." >> $GITHUB_STEP_SUMMARY
         exit 1
     fi
-    echo "✅ Update: ${MODULE} dependencies versions to next-snapshot updated successfully." >> $GITHUB_STEP_SUMMARY
     echo "::group::Clean and commit pom.xml with next-snapshot version."
     echo "Committing pom.xml with release version."
     mvn --batch-mode clean
@@ -100,7 +99,7 @@ function bump_dependencies_versions() {
     if [ -z "${gitdiffstat}" ]
     then
         echo "No changes"
-        echo "✅ Commit: There were no changed dependencies versions in ${MODULE} pom.xml." >> $GITHUB_STEP_SUMMARY
+        echo "Commit: There were no changed dependencies versions in ${MODULE} pom.xml." >> $GITHUB_STEP_SUMMARY
         return
     else
         git add .
