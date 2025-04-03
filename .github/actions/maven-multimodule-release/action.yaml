@@ -78,9 +78,9 @@ runs:
         echo "::group::Building ${{ inputs.module }}"
         bump_version_and_build
         echo "::endgroup::"
-        echo "::group::Bump version to next snapshot"
-        bump_to_next_snapshot
-        echo "::endgroup::"
+        # echo "::group::Bump version to next snapshot"
+        # bump_to_next_snapshot
+        # echo "::endgroup::"
       shell: bash
       env:
         MAVEN_USERNAME: ${{ github.actor }}
