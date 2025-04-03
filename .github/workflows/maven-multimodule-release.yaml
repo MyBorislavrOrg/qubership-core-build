@@ -97,6 +97,7 @@ jobs:
           fi
         shell: bash
       - name: "Build and Publish"
+        id: build-and-publish
         uses: MyBorislavrOrg/qubership-core-build/.github/actions/maven-multimodule-release@main
         with:
           version-type: ${{ github.event.inputs.version-type }}
@@ -105,14 +106,14 @@ jobs:
           token: ${{ secrets.MVN_DEPLOY_CLASSIC_TOKEN }}
           dry-run: 'false'
           server-id: github
-      # - name: "Trigger module release"
-      #   uses: netcracker/qubership-workflow-hub/actions/custom-event@main
-      #   with:
-      #     github-token: ${{ secrets.REMOTE_TRIGGER_TOKEN }}
-      #     repo: ${{ matrix.module }}
-      #     owner: ${{ github.repository_owner }}
-      #     event-type: remote_release_trigger
-      #     client-payload: |
-      #       {
-      #         "version": "${{ env.VERSION }}"
-      #       }
+      - name: "Trigger module release"
+        uses: netcracker/qubership-workflow-hub/actions/custom-event@main
+        with:
+          github-token: ${{ secrets.REMOTE_TRIGGER_TOKEN }}
+          repo: ${{ matrix.module }}
+          owner: ${{ github.repository_owner }}
+          event-type: remote_release_trigger
+          client-payload: |
+            {
+              "version": "${{ steps.build-and-publish.outputs.release-version }}"
+            }

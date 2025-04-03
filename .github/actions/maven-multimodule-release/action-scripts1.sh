@@ -33,19 +33,19 @@ function bump_version_and_build() {
             echo "Build failed. Exiting."
             exit 1
         fi
+        export RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
     else
         mvn --batch-mode versions:use-releases -DgenerateBackupPoms=false
         mvn --batch-mode release:prepare -DautoVersionSubmodules=true -DpushChanges=true -DtagNameFormat="v@{project.version}"
-        cat release.properties
-        exit 0
         if [ $? -ne 0 ]; then
             echo "Release preparation failed. Exiting."
             exit 1
         fi
+        # scm.tag=v2.0.2
+        export RELEASE_VERSION=$(sed -n "s/scm.tag=v//p" release.properties)
     fi
-    export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-    echo "VERSION=${VERSION}" >> $GITHUB_ENV
-    echo "Building ${MODULE} version ${VERSION}"
+    echo "RELEASE_VERSION=${RELEASE_VERSION}" >> $GITHUB_OUTPUT
+    echo "Building ${MODULE} version ${RELEASE_VERSION}"
     if [ "${DRY_RUN}" != "false" ]; then
         echo "Dry run. Not committing."
         return

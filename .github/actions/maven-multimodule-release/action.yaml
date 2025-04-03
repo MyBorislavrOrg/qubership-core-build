@@ -38,6 +38,10 @@ inputs:
     required: true
     default: ''
     type: string
+outputs:
+  release-version:
+    description: 'Release version'
+    value: ${{ steps.release.outputs.RELEASE_VERSION }}
 runs:
   using: "composite"
   steps:
@@ -68,12 +72,15 @@ runs:
         repository: ${{ github.repository_owner }}/${{ inputs.module }}
         token: ${{ inputs.token }}
     - name: "Release"
+      id: release
       run: |
         . ${GITHUB_ACTION_PATH}/action-scripts1.sh
-        echo "Building ${{ inputs.module }}"
+        echo "::group::Building ${{ inputs.module }}"
         bump_version_and_build
-        echo "Bump version to next snapshot"
+        echo "::endgroup::"
+        echo "::group::Bump version to next snapshot"
         bump_to_next_snapshot
+        echo "::endgroup::"
       shell: bash
       env:
         MAVEN_USERNAME: ${{ github.actor }}
