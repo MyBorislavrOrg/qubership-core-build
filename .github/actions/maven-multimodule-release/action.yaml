@@ -95,9 +95,8 @@ runs:
         path: ${{ inputs.module }}
         repository: ${{ github.repository_owner }}/${{ inputs.module }}
         token: ${{ inputs.token }}
-    - name: "Release"
+    - name: "Bump dependencies versions to next snapshot"
       if: ${{ inputs.dry-run == 'false' }}
-      id: release
       run: |
         . ${GITHUB_ACTION_PATH}/action-scripts1.sh
         bump_dependencies_versions
