@@ -1,2 +1,7 @@
-target/
-/.idea/
+.vscode
+.idea
+node_modules
+.DS_Store
+dist
+coverage
+.env
