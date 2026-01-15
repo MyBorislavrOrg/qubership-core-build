@@ -65,7 +65,7 @@ runs:
         # gpg-private-key: ${{ secrets.gpg-private-key }}
         # gpg-passphrase: MAVEN_GPG_PASSPHRASE
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         ref: main
         path: ${{ inputs.module }}
@@ -94,7 +94,7 @@ runs:
       shell: bash
     - name: Checkout
       if: ${{ inputs.dry-run == 'false' }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         ref: main
         path: ${{ inputs.module }}
